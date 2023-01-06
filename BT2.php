@@ -1,90 +1,107 @@
 <?php
 class Student{
-    public $name, $year, $pointMath, $pointPhys, $pointChems;
-    public function __construct($name, $year, $pointMath, $pointPhys, $pointChems){
+    protected $name, $year, $pointMath, $pointPhy, $pointChem;
+    public function __construct($name, $year, $pointMath, $pointPhy, $pointChem){
         $this->name = $name;
         $this->year = $year;
         $this->pointMath = $pointMath;
-        $this->pointPhys = $pointPhys;
-        $this->pointChems = $pointChems;
-    }
-    
-    public function getStudent(){
-        return ([
+        $this->pointPhy = $pointPhy;
+        $this->pointChem = $pointChem;
+    } 
+    public function layDuLieuHocSinh(){
+        echo implode(" ", [
             $this->name,
             $this->year,
             $this->pointMath,
-            $this->pointChems,
-            $this->pointPhys,
+            $this->pointPhy,
+            $this->pointChem,
+        ]);
+    }
+}
+class Average extends Student{
+    protected static $names, $years, $pointMaths, $pointChems, $pointPhys;
+    public static function setAverage($name, $year, $pointChem, $pointMath, $pointPhy){
+        self::$pointChems = $pointChem;
+        self::$pointMaths = $pointMath;
+        self::$pointPhys = $pointPhy;
+        self::$names = $name;
+        self::$years = $year;
+        
+        return number_format((($pointChem + $pointPhy + $pointMath) / 3), 2);
+    }
+    public static function getAverage($name, $year, $pointChem, $pointMath, $pointPhy){
+        echo implode(" ", [
+            "Diem trung binh ",
+            $name, 
+            $year, 
+            Average::setAverage($name, $year, $pointChem, $pointMath, $pointPhy),
         ]);
     }
     
-    public function average(){
-        return number_format((($this->pointChems + $this->pointPhys + $this->pointMath) / 3), 2)."<br/>";
-    }
-    
-    public function averageBigger5(){
-        if(number_format((($this->pointChems + $this->pointPhys + $this->pointMath) / 3), 2) > 5){
-            return self::getStudent();
+    public static function getAverage5($name, $year, $pointChem, $pointMath, $pointPhy){
+        $average = Average::setAverage($name, $year, $pointChem, $pointMath, $pointPhy);
+        if($average >= 5 ){
+            echo implode(" ", [
+                "Trung binh lon hon 5",
+                $name, 
+                $average,
+            ]);
         }
     }
-    public function BornIn2001(){
+}
+class Year extends Student{
+    public function getYear()
+    {     
         if($this->year == 2001){
-            return true;
+            echo implode(" ",[ 
+                $this->name,
+                $this->year,
+            ]);
         }
-        return false;
+        return $this;
     }
 }
 
 class ListStudent{
-    private $ListSV;
-    public function __construct($ListSV){
-        foreach ($ListSV as $value) {
-            $this->ListSV[]= new Student($value[0], $value[1], $value[2],$value[3], $value[4]);
-        }
-    }
-    public function averageList($min_score = 0){
-        $aver_list = [];
-        foreach ($this->ListSV as $value) {
-            if ($value->average() > $min_score){
-                $aver_list[] = $value->average();
-            }
-        }
-        return $aver_list;
-    }
-    public function averageBigger5(){
-        return self::averageList(5);
-    }
-    public function List2001(){
-        $aver_list = [];
-        foreach ($this->ListSV as $value) {
-            if ($value->BornIn2001()){
-                $aver_list[] = $value;
-            }
-        }
-        return $aver_list;
+    public static function getList(){
+        return [
+            ["A", 2001, 7, 8,9],
+            ["B", 2002, 5, 4,3],
+            ["C", 2001, 10, 10,9],
+            ["D", 2002, 9, 8,9],
+            ["E", 2000, 4, 5,5],
+        ];
     }
 }
 
 class Main{
-    public static function run(){
-        $list = [
-            ["A", 2001, 7, 8, 9],
-            ["B", 2002, 8, 7, 7],
-            ["C", 2001, 10, 10, 9],
-            ["D", 2002, 9, 8, 9],
-            ["E", 2000, 4, 5, 5],
-        ];
+    public static function run()
+    {
+        $list = [];
+        foreach (ListStudent::getList() as $student) {
+            list($name, $year, $pointMath, $pointPhy, $pointChem) = $student;
+            
+            $list_average = new Average($name, $year, $pointMath, $pointPhy, $pointChem);
+            echo "<br/>";
+            echo "<br/>";
+            $list_average->getAverage($name, $year, $pointMath, $pointPhy, $pointChem);
+            // Lay danh sach trung binh
+            $list_average5 = new Average($name, $year, $pointMath, $pointPhy, $pointChem);
+            echo "<br/>";
+            // danh sach diem lon hon 5
+            $list_average5->getAverage5($name, $year, $pointMath, $pointPhy, $pointChem);
+            
+            // danh sach sinh nam 2001
+            $list[] = new Year($name, $year, $pointMath, $pointPhy, $pointChem);
+        }
         
-        $ds_sv = new ListStudent($list);
-        echo "Danh sach sinh vien</br>";
-        print_r($ds_sv);
-        echo "</br></br> Danh sach diem trung binh</br>";
-        print_r($ds_sv->averageList());
-        echo "</br></br> Danh sach diem trung binh lon hon 5</br>";
-        print_r($ds_sv->averageBigger5());
-        echo "</br> Danh sach sinh nam 2001</br>";
-        print_r($ds_sv->List2001());
+        echo "<br/>";
+        echo "Sinh nam 2001";
+        foreach($list as $item){
+            echo "<br/>";
+            $item->getYear();
+        }
+
     }
 }
 Main::run();
