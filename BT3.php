@@ -17,6 +17,9 @@ abstract class NhanVien{
         ]);
     }
     abstract public function getLuong();
+    public function getNamKN(){
+        return $this->nam_kinh_nghiem;
+    }
 } 
 class LapTrinh extends NhanVien{
     public function getLuong(){
@@ -63,25 +66,32 @@ class QuanLyNhanVien{
         $listNhanVien = [];
         foreach($dataNV as $nhanvien){
             list($ten, $nam_sinh, $chuc_vu, $doanh_so, $nam_kinh_nghiem, $luong_co_ban) = $nhanvien;
-            if(($chuc_vu == "LapTrinh")){
-                $listNhanVien[] = new LapTrinh($ten, $nam_sinh, $chuc_vu, $nam_kinh_nghiem, $luong_co_ban);
-            } else if(($chuc_vu == "BanHang")){
-                $listNhanVien[] = new BanHang($ten, $nam_sinh, $chuc_vu, $nam_kinh_nghiem, $luong_co_ban, $doanh_so);
-            } else if(($chuc_vu == "LeTan")){
-                $listNhanVien[] = new LeTan($ten, $nam_sinh, $chuc_vu, $nam_kinh_nghiem, $luong_co_ban);
-            } else if(($chuc_vu == "GiamDoc")){
-                $listNhanVien[] = new GiamDoc($ten, $nam_sinh, $chuc_vu, $nam_kinh_nghiem, $luong_co_ban); 
+            switch($chuc_vu){
+                case 'LapTrinh':
+                    $listNhanVien[] = new LapTrinh($ten, $nam_sinh, $chuc_vu, $nam_kinh_nghiem, $luong_co_ban);
+                    break;
+                case 'Banhang':
+                    $listNhanVien[] = new BanHang($ten, $nam_sinh, $chuc_vu, $nam_kinh_nghiem, $luong_co_ban, $doanh_so);
+                    break;
+                case 'LeTan':
+                    $listNhanVien[] = new LeTan($ten, $nam_sinh, $chuc_vu, $nam_kinh_nghiem, $luong_co_ban);
+                    break;
+                case 'GiamDoc':
+                    $listNhanVien[] = new GiamDoc($ten, $nam_sinh, $chuc_vu, $nam_kinh_nghiem, $luong_co_ban); 
+                    break;
+
             }
         }
         return $listNhanVien;
     }
+    
+    public function xuatDanhSachNv($listNhanVien){
+        foreach($listNhanVien as $item){
+            $item->xuatThongTinNhanVien();
+            echo "<br>";
+        }
+    }
 
-    // public function xuatThongTin($listNhanVien){
-    //     foreach ($listNhanVien as $item) {
-    //         $item->xuatThongTinNhanVien();
-    //         echo "<br>";
-    //     }  
-    // }
     public function tinhTongLuong($listNhanVien){
         $tongLuong = 0;
         foreach($listNhanVien as $item){
@@ -94,35 +104,37 @@ class QuanLyNhanVien{
         echo "<br>";
     }
       
-    public function xuatLuongCaoNhat($listNhanVien){
+    public function layLuongCaoNhat($listNhanVien){
         $max = $listNhanVien[0]->getLuong();
         foreach($listNhanVien as $item){
             if (($item->getLuong()) > $max) {
                 $max = $item->getLuong();
             }
         }
+        $luongCaoNhat = [];
         foreach($listNhanVien as $item){
             if (($item->getLuong()) ==  $max) {
-                $item->xuatThongTinNhanVien();
-                echo "<br>";
+                $luongCaoNhat[] = $item;
             }
         }
+        return $luongCaoNhat;
         // echo $max;
     }
 
-    public function xuatLuongThapNhat($listNhanVien){
+    public function layLuongThapNhat($listNhanVien){
         $min = $listNhanVien[0]->getLuong();
         foreach($listNhanVien as $item){
             if (($item->getLuong()) < $min) {
                 $min = $item->getLuong();
             }
         }
+        $luongThapNhat = [];
         foreach($listNhanVien as $item){
             if (($item->getLuong()) ==  $min) {
-                $item->xuatThongTinNhanVien();
-                echo "<br>";
+                $luongThapNhat[] = $item;
             }
         }
+        return $luongThapNhat;
         // echo $min;
     }
 
@@ -133,52 +145,139 @@ class QuanLyNhanVien{
         $tbLuong = floatval($tongLuong / $length);
         return $tbLuong;
     }
-    public function xuatTBLuong($listNhanVien){
-        echo $this->tinhTBLuong($listNhanVien);
-        echo "<br>";
+    
+    public function layNVLuongNhoHonTB($listNhanVien, $number){
+        $dsNhoHon = [];
+        foreach($listNhanVien as $item){
+            if ($item->getLuong() < $number) {
+                $dsNhoHon[] = $item;
+            }
+        }
+        return $dsNhoHon;
+    }
+    public function layNVLuongLonHonTB($listNhanVien, $number){
+        $dsLonHon = [];
+        foreach($listNhanVien as $item){
+            if ($item->getLuong() > $number) {
+                $dsLonHon[] = $item;
+            }
+        }
+        return $dsLonHon;
     }
     
-    public function xuatNVLuongNhoHonTB($listNhanVien){
+    public function layNVNamKNLonHon($listNhanVien, $number){
+        $dsNamKN = [];
         foreach($listNhanVien as $item){
-            if ($item->getLuong() < $this->tinhTBLuong($listNhanVien)) {
-                $item->xuatThongTinNhanVien();
-                echo "<br>";
+            if($item->getNamKN() > $number){
+                $dsNamKN[] = $item;
             }
         }
-    }
-    public function xuatNVLuongLonHonTB($listNhanVien){
-        foreach($listNhanVien as $item){
-            if ($item->getLuong() > $this->tinhTBLuong($listNhanVien)) {
-                $item->xuatThongTinNhanVien();
-                echo "<br>";
-            }
-        }
+        return $dsNamKN;
     }
 }
+
+interface NVFilter{
+    public function filter($listNv);
+}
+
+abstract class ANVFilter implements NVFilter{
+    protected $condition;
+    protected $value;
+
+    public function filter($listNv){
+        $result = [];
+        foreach($listNv as $nv){
+            if($this->match($nv)){
+                $result[] = $nv;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param NhanVien $object
+     */
+    public abstract function match($object);
+    
+    public function __construct($condition, $value){
+        $this->condition = $condition;
+        $this->value = $value;
+    }
+}
+
+class LuongFilter extends ANVFilter{
+	/**
+	 * @param NhanVien $object
+	 * @return mixed
+	 */
+	public function match($object) {
+        switch($this->condition){
+            case '<':
+            return $object->getLuong() < $this->value;
+            case '>':
+            return $object->getLuong() > $this->value;
+        }
+        return false;
+	}
+}
+
+
+
+class NamKNFilter extends ANVFilter{
+	/**
+	 * @param NhanVien $object
+	 * @return mixed
+	 */
+	public function match($object) {
+        switch($this->condition){
+            case '<':
+            return $object->getNamKN() < $this->value;
+            case '>':
+            return $object->getNamKN() > $this->value;
+        }
+        return false;
+	}
+}
+
 class Main{
     public static function run(){
         $congty = new QuanLyNhanVien();
         $listNhanVien = $congty->layDuLieuNhanVien();
-        // $congty->xuatThongTin($listNhanVien);     
         
+        $congty->xuatDanhSachNv($listNhanVien);     
         echo "Tong luong phai tra: <br>";  
         $congty->xuatTongluong($listNhanVien);     
         
         echo "<br>Luong cao nhat: <br>";
-        $congty->xuatLuongCaoNhat($listNhanVien);   
+        $luongCaoNhat = $congty->layLuongCaoNhat($listNhanVien);
+        $congty->xuatDanhSachNv($luongCaoNhat);
         
         echo "<br>Luong thap nhat: <br>";
-        $congty->xuatLuongThapNhat($listNhanVien);
+        $luongThapNhat = $congty->layLuongThapNhat($listNhanVien);
+        $congty->xuatDanhSachNv($luongThapNhat);
         
         echo "<br>Trung binh luong: ";
-        $congty->xuatTBLuong($listNhanVien);
+        $trungBinh = $congty->tinhTBLuong($listNhanVien);
+        echo $trungBinh;
         
         echo "<br>Danh sach nhan vien luong nho hon TB: <br>";
-        $congty->xuatNVLuongNhoHonTB($listNhanVien);     
+        $nhoHonTrungBinh = $congty->layNVLuongNhoHonTB($listNhanVien, $trungBinh);
+        $congty->xuatDanhSachNv($nhoHonTrungBinh);
         
         echo "<br>Danh sach nhan vien luong lon hon TB: <br>";
-        $congty->xuatNVLuongLonHonTB($listNhanVien);   
+        $lonHonTrungBinh = $congty->layNVLuongLonHonTB($listNhanVien, $trungBinh);   
+        $congty->xuatDanhSachNv($lonHonTrungBinh);
 
+        echo "<br>Danh sach nam kinh nghiem lon hon 5<br>";
+        $condtions = [
+            new LuongFilter('<', $trungBinh),
+            new NamKNFilter('>', 5),
+        ];
+        $myList = $listNhanVien;
+        foreach($condtions as $condition){
+            $myList = $condition->filter($myList);
+        }
+        $congty->xuatDanhSachNV($myList);   
     }
 }
 Main::run();   
